@@ -1,0 +1,10 @@
+{
+  "domain": "discord_webhook",
+  "name": "Discord Webhook",
+  "documentation": "https://github.com/yourusername/hass-discord-webhook",
+  "dependencies": ["notify"],
+  "codeowners": ["@yourusername"],
+  "requirements": ["aiohttp>=3.7.4"],
+  "version": "1.0.0",
+  "iot_class": "cloud_push"
+}
