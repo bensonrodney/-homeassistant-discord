@@ -2,6 +2,8 @@
 
 This is a custom integration for Home Assistant that allows you to send messages to Discord using webhooks. It supports both the legacy service and the new notification platform.
 
+The reason this project was created is because I found the use of Discord webhooks to be so much easier than the official Home Assistant Discord integration.
+
 At the time of writing this README, the entire integration was written by Windsurf AI.
 
 ℹ️ There is a full README.md in the `custom_components/discord_webhook` directory.
