@@ -4,6 +4,8 @@ This is a custom integration for Home Assistant that allows you to send messages
 
 At the time of writing this README, the entire integration was written by Windsurf AI.
 
+ℹ️ There is a full README.md in the `custom_components/discord_webhook` directory.
+
 ## Installation
 
 Copy the `discord_webhook` folder to your Home Assistant's `custom_components` directory (found in the `config` directory of your Home Assistant installation, if not, you need to create it).
