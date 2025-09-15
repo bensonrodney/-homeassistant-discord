@@ -6,5 +6,8 @@
   "codeowners": ["@yourusername"],
   "requirements": ["aiohttp>=3.7.4"],
   "version": "1.0.0",
-  "iot_class": "cloud_push"
+  "iot_class": "cloud_push",
+  "config_flow": false,
+  "after_dependencies": ["http"],
+  "issue_tracker": "https://github.com/yourusername/hass-discord-webhook/issues"
 }

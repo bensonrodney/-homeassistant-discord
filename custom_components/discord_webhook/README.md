@@ -9,20 +9,27 @@ This is a custom integration for Home Assistant that allows you to send messages
 
 ## Configuration
 
-### Option 1: Using the Notification Platform (Recommended)
+### Option 1: Multiple Webhooks (Recommended)
+
+You can configure multiple Discord webhooks, each with its own settings. Each webhook will be available as a separate notification service.
 
 ```yaml
 # Example configuration.yaml entry
-notify:
-  - name: discord
-    platform: discord_webhook
-    webhook_url: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"
-    username: "Home Assistant"  # Optional
-    avatar_url: "https://www.home-assistant.io/images/favicon-192x192-full.png"  # Optional
-    tts: false  # Optional, default false
+discord_webhook:
+  webhooks:
+    - name: "Home Alerts"  # Optional, defaults to "Discord Webhook"
+      webhook_url: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"
+      username: "Home Assistant"  # Optional
+      avatar_url: "https://www.home-assistant.io/images/favicon-192x192-full.png"  # Optional
+      tts: false  # Optional, default false
+    - name: "Security Alerts"
+      webhook_url: "https://discord.com/api/webhooks/another_webhook_id/another_token"
+      username: "Home Security"
 ```
 
-### Option 2: Legacy Configuration
+### Option 2: Single Webhook (Legacy)
+
+For backward compatibility, a single webhook can still be configured using the legacy format:
 
 ```yaml
 # Legacy configuration (still supported)
@@ -33,16 +40,38 @@ discord_webhook:
   tts: false  # Optional, default false
 ```
 
-## Usage
+### Option 3: Using the Notification Platform
 
-### Using the Notification Service (Recommended)
+You can also configure webhooks directly in the notify platform:
 
 ```yaml
-# Basic notification
-service: notify.discord
+notify:
+  - name: discord_alerts
+    platform: discord_webhook
+    webhook_url: "https://discord.com/api/webhooks/your_webhook_id/your_webhook_token"
+    username: "Home Assistant"  # Optional
+    avatar_url: "https://www.home-assistant.io/images/favicon-192x192-full.png"  # Optional
+    tts: false  # Optional, default false
+```
+
+## Usage
+
+### Using Multiple Webhooks
+
+When you configure multiple webhooks, each one will be available as a separate service. The service name will be based on the webhook name:
+
+```yaml
+# Basic notification to a specific webhook
+service: notify.discord_home_alerts  # Based on the 'name' in configuration
 data:
-  message: "This is a test message"
+  message: "This is a test message to the home alerts channel"
   title: "Important Alert"  # Optional
+
+# Or for the second webhook
+service: notify.discord_security_alerts
+data:
+  message: "Security alert triggered!"
+  title: "🚨 Security Alert"
 
 # Notification with images
 service: notify.discord
@@ -63,7 +92,33 @@ data:
     tts: true  # Enable text-to-speech
 ```
 
-### Legacy Service (discord_webhook.send_message)
+### Service Details
+
+#### Notification Service
+
+When using the notification platform, each webhook will be available as `notify.[service_name]` where `[service_name]` is derived from the webhook name (lowercase, with spaces replaced by underscores).
+
+| Service data attribute | Optional | Description |
+|------------------------|----------|-------------|
+| `message` | No | The message to send (max 2000 characters) |
+| `title` | Yes | Message title (will be displayed in bold above the message) |
+| `data` | Yes | Additional data (see below) |
+
+#### Data Attributes
+
+Additional options can be passed in the `data` dictionary:
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `username` | string | Override the default username for this message |
+| `avatar_url` | string | Override the default avatar URL for this message |
+| `tts` | boolean | Whether to use text-to-speech (default: false) |
+| `images` | list | List of image URLs to include in the message |
+| `embeds` | list | List of Discord embeds (advanced) |
+
+#### Legacy Service (discord_webhook.send_message)
+
+For backward compatibility, the legacy service is still available but not recommended for new configurations.
 
 | Service data attribute | Optional | Description |
 |------------------------|----------|-------------|
