@@ -9,9 +9,27 @@ This is a custom integration for Home Assistant that allows you to send messages
 
 ## Configuration
 
-### Option 1: Multiple Webhooks (Recommended)
+### Option 0: UI Config Flow (Recommended)
 
-You can configure multiple Discord webhooks, each with its own settings. Each webhook will be available as a separate notification service.
+You can configure this integration from the Home Assistant UI:
+
+1. Go to: Settings > Devices & Services > Add Integration.
+2. Search for and select "Discord Webhook".
+3. Enter the details for the webhook:
+   - Name (used to derive the notify service name)
+   - Webhook URL (required)
+   - Username (optional)
+   - Avatar URL (optional)
+   - TTS (optional)
+4. Submit to create the entry.
+
+Notes:
+- Each config flow entry creates its own notify service, so you can maintain multiple distinct Discord webhooks (e.g., alerts vs. general updates).
+- You can add multiple instances by repeating the above steps. Duplicate entries with the same `webhook_url` are prevented.
+
+### Option 1: YAML — Multiple Webhooks
+
+You can configure multiple Discord webhooks in YAML. Each webhook will be available as a separate notification service.
 
 ```yaml
 # Example configuration.yaml entry
@@ -27,7 +45,7 @@ discord_webhook:
       username: "Home Security"
 ```
 
-### Option 2: Single Webhook (Legacy)
+### Option 2: YAML — Single Webhook (Legacy)
 
 For backward compatibility, a single webhook can still be configured using the legacy format:
 
@@ -40,7 +58,7 @@ discord_webhook:
   tts: false  # Optional, default false
 ```
 
-### Option 3: Using the Notification Platform
+### Option 3: YAML — Using the Notification Platform
 
 You can also configure webhooks directly in the notify platform:
 
@@ -91,6 +109,17 @@ data:
     avatar_url: "https://example.com/avatar.png"
     tts: true  # Enable text-to-speech
 ```
+
+## YAML Import (How YAML becomes UI entries)
+
+If you configure webhooks in `configuration.yaml` under `discord_webhook:`, they will be imported into the UI as Config Entries on startup or when the integration is reloaded.
+
+Behavior details:
+- Each imported entry is normalized like the UI flow (optional empty strings become `null`, and `tts` uses the default if omitted).
+- Import uses the `webhook_url` as a unique identifier to prevent duplicates. If an entry with the same `webhook_url` already exists, it will be skipped.
+- Invalid entries (e.g., `webhook_url` not starting with `http`) are safely ignored during import.
+
+After import, you can manage these entries from Settings > Devices & Services > Integrations like any other UI-added instance.
 
 ### Service Details
 
