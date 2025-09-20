@@ -6,7 +6,7 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, SOURCE_IMPORT
 from homeassistant.const import CONF_PLATFORM, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv, discovery
@@ -70,7 +70,12 @@ def _discovery_payload(
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Set up the Discord Webhook component from YAML (legacy)."""
+    """Set up the Discord Webhook component from YAML (legacy).
+
+    If YAML config is present, import each webhook as a config entry (one per webhook)
+    via the config entries flow. This migrates users to the UI while keeping YAML
+    as the source of truth during import.
+    """
     if DOMAIN not in config:
         return True
 
@@ -83,22 +88,31 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         # Convert legacy config to new format
         webhooks = [conf]
 
-    # Register each webhook as a notification service
+    # Import each webhook as a config entry if not already present
+    existing = {entry.unique_id for entry in hass.config_entries.async_entries(DOMAIN)}
     for webhook in webhooks:
-        name = webhook[CONF_NAME]
+        name = webhook.get(CONF_NAME, DEFAULT_NAME)
         webhook_url = webhook[CONF_WEBHOOK_URL]
         username = webhook.get(CONF_USERNAME)
         avatar_url = webhook.get(CONF_AVATAR_URL)
         tts = webhook.get(CONF_TTS, DEFAULT_TTS)
 
-        # Set up the notify platform for this webhook via discovery
+        if webhook_url in existing:
+            _LOGGER.debug("Webhook already imported; skipping: %s", name)
+            continue
+
+        _LOGGER.debug("Importing YAML webhook into config entry: %s", name)
         hass.async_create_task(
-            discovery.async_load_platform(
-                hass,
-                Platform.NOTIFY,
+            hass.config_entries.flow.async_init(
                 DOMAIN,
-                _discovery_payload(name, webhook_url, username, avatar_url, tts),
-                config,
+                context={"source": SOURCE_IMPORT},
+                data={
+                    CONF_NAME: name,
+                    CONF_WEBHOOK_URL: webhook_url,
+                    **({CONF_USERNAME: username} if username else {}),
+                    **({CONF_AVATAR_URL: avatar_url} if avatar_url else {}),
+                    **({CONF_TTS: tts} if tts != DEFAULT_TTS else {}),
+                },
             )
         )
 

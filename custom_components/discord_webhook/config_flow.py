@@ -66,3 +66,24 @@ class DiscordWebhookConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 return self.async_create_entry(title=title, data=data)
 
         return self.async_show_form(step_id="user", data_schema=_schema(user_input), errors=errors)
+
+    async def async_step_import(self, user_input: dict[str, Any]) -> FlowResult:
+        """Handle import from YAML configuration."""
+        # Normalize like user step
+        data: dict[str, Any] = {
+            CONF_NAME: user_input.get(CONF_NAME) or DEFAULT_NAME,
+            CONF_WEBHOOK_URL: (user_input.get(CONF_WEBHOOK_URL) or "").strip(),
+            CONF_USERNAME: (user_input.get(CONF_USERNAME) or "").strip() or None,
+            CONF_AVATAR_URL: (user_input.get(CONF_AVATAR_URL) or "").strip() or None,
+            CONF_TTS: bool(user_input.get(CONF_TTS, DEFAULT_TTS)),
+        }
+
+        # Basic validation: if invalid, abort import to avoid creating bad entries
+        if not data[CONF_WEBHOOK_URL].startswith("http"):
+            return self.async_abort(reason="invalid_url")
+
+        await self.async_set_unique_id(data[CONF_WEBHOOK_URL])
+        self._abort_if_unique_id_configured()
+
+        title = data.get(CONF_NAME) or DEFAULT_NAME
+        return self.async_create_entry(title=title, data=data)
