@@ -1,0 +1,25 @@
+{
+  "config": {
+    "title": "Discord Webhook",
+    "step": {
+      "user": {
+        "title": "Add Discord Webhook",
+        "description": "Create a notification service that posts to a Discord webhook.",
+        "data": {
+          "name": "Name",
+          "webhook_url": "Webhook URL",
+          "username": "Username (optional)",
+          "avatar_url": "Avatar URL (optional)",
+          "tts": "Text-to-Speech"
+        }
+      }
+    },
+    "error": {
+      "invalid_url": "Please enter a valid URL starting with http or https."
+    },
+    "abort": {
+      "already_configured": "A webhook with this URL is already configured.",
+      "invalid_url": "Invalid configuration: Webhook URL must start with http or https."
+    }
+  }
+}
